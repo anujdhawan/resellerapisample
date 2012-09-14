@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Reseller App</title>
+    <link rel="stylesheet" type="text/css" href="/css/global.css">
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    {% block head %}{% endblock %}
+  </head>
+  <body>
+    <header>
+      <h1><a href="/">Reseller API Sample</a> <span>Testing the Reseller API</span></h1>
+      <div class="auth-info">
+        {% if not authenticated %}
+          <a class="button" href="{{oauth_url}}">Authorize</a>
+        {% else %}
+          <span>Authorized! &ndash; </span><a href="/logout">Logout</a>
+          <form id="sandbox-switch" action="/sandbox-switch" method="POST">
+            <input type="checkbox" name="use-sandbox" id="use-sandbox"
+              {{"checked" if useSandbox}} />
+            <label for="use-sandbox">Use Sandbox</label>
+          </form>
+          <script>
+            $("form#sandbox-switch input").change(function() {
+              $(this).parents("form").submit();
+            });
+          </script>
+        {% endif %}
+      </div>
+    </header>
+    <section class="main">
+      {% block main_content %}{% endblock %}
+    </section>
+  </body>
+</html>
