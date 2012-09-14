@@ -1,0 +1,77 @@
+{% extends "skeleton.html" %}
+
+{% block head %}
+  <style>
+    fieldset {
+      width: 400pt;
+    }
+    fieldset fieldset {
+      width: auto;
+    }
+    fieldset label {
+      float: left;
+      width: 100pt;
+      margin: 0.25em 0;
+    }
+    fieldset input {
+      float: left;
+      width: 250pt;
+      margin: 0.25em 0;
+    }
+
+    fieldset input[type=submit] {
+      clear: both;
+      width: 75pt;
+    }
+  </style>
+{% endblock %}
+
+{% block main_content %}
+  <h1>New Customer</h1>
+  <fieldset>
+    <legend>Customer Details</legend>
+    <form method="post">
+      <label for="customerDomain">Customer Domain:</label>
+      <input type="text" name="customerDomain" id="customerDomain" placeholder="example.com" />
+
+      <fieldset>
+        <legend>Postal Address</legend>
+
+        <label for="contactName">Contact Name:</label>
+        <input type="text" name="contactName" id="contactName" value="John Doe" />
+
+        <label for="organizationName">Organization Name:</label>
+        <input type="text" name="organizationName" id="organizationName" value="Example Inc" />
+
+        <label for="locality">Locality:</label>
+        <input type="text" name="locality" id="locality" value="Mountain View" />
+
+        <label for="region">Region:</label>
+        <input type="text" name="region" id="region" value="California" />
+
+        <label for="postalCode">Postal Code:</label>
+        <input type="number" name="postalCode" id="postalCode" value="94043" />
+
+        <label for="countryCode">Country Code:</label>
+        <input type="text" name="countryCode" id="countryCode" value="US" />
+
+        <label for="addressLine1">Address (Line 1):</label>
+        <input type="text" name="addressLine1" id="addressLine1" value="1600 Amphitheatre Parkway" />
+
+        <label for="addressLine2">Address (Line 2):</label>
+        <input type="text" name="addressLine2" id="addressLine2" value="Mountain View" />
+
+        <label for="addressLine3">Address (Line 3):</label>
+        <input type="text" name="addressLine3" id="addressLine3" value="California" />
+      </fieldset>
+
+      <label for="phoneNumber">Phone Number:</label>
+      <input type="text" name="phoneNumber" id="phoneNumber" value="+1 650-253-0000" />
+
+      <label for="alternateEmail">Alternate Email:</label>
+      <input type="email" name="alternateEmail" id="alternateEmail" placeholder="email@domain.com" />
+
+      <input type="submit" />
+    </form>
+  </fieldset>
+{% endblock %}

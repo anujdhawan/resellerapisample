@@ -1,0 +1,17 @@
+{% extends "skeleton.html" %}
+
+{% block main_content %}
+  {% if not authenticated %}
+    <h1>Not Authorized</h1>
+    <p>To get started, you must authorize (by clicking &ldquo;Authorize&rdquo; above) before you can start.</p>
+  {% else %}
+    <h1>Operations</h1>
+    <p>Below is a list of the operations this application allows you to
+       perform (note that this is only a sample of the function available in
+       the Reseller API)</p>
+    <ul>
+      <li><a href="/op/list-subscriptions">List subscriptions</a>
+      <li><a href="/op/new-customer">New customer</a>
+    </ul>
+  {% endif %}
+{% endblock %}
