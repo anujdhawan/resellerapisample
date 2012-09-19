@@ -13,6 +13,8 @@ app = webapp2.WSGIApplication([("/", handlers.MainHandler),
                                ("/logout", handlers.Logout),
                                ("/sandbox-switch", handlers.SandboxSwitch),
                                ("/op/list-subscriptions", handlers.OpListSubscriptions),
-                               ("/op/new-customer", handlers.OpNewCustomer)],
+                               ("/op/new-customer", handlers.OpNewCustomer),
+                               ("/op/get-customer", handlers.OpGetCustomer),
+                               ("/op/change-seats", handlers.OpChangeSeats)],
                               debug=True)
 

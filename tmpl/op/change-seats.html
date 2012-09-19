@@ -1,0 +1,51 @@
+{% extends "skeleton.html" %}
+
+{% block head %}
+  <style>
+    fieldset {
+      width: 400pt;
+    }
+    fieldset label {
+      float: left;
+      width: 100pt;
+      margin: 0.25em 0;
+    }
+    fieldset select {
+      float: left;
+      width: 250pt;
+      margin: 0.25em 0;
+    }
+    fieldset input {
+      float: left;
+      width: 250pt;
+      margin: 0.25em 0;
+    }
+
+    fieldset input[type=submit] {
+      clear: both;
+      width: 75pt;
+    }
+  </style>
+{% endblock %}
+
+{% block main_content %}
+  <h1>Change Seats</h1>
+  <fieldset>
+    <form method="post">
+      <label for="subscription">Subscription:</label>
+      <select name="subscription" id="subscription">
+        {% for subscription in subscriptions.subscriptions %}
+          <option value="{{subscription.customerId}}:{{subscription.subscriptionId}}">{{subscription.customerId}} : {{subscription.skuId}}</option>
+        {% endfor %}
+      </select>
+
+      <label for="numberOfSeats"># Seats:</label>
+      <input type="text" name="numberOfSeats" id="numberOfSeats" placeholder="1234" />
+
+      <label for="maximumNumberOfSeats">Max # Seats:</label>
+      <input type="text" name="maximumNumberOfSeats" id="maximumNumberOfSeats" placeholder="Optional" />
+
+      <input type="submit" />
+    </form>
+  </fieldset>
+{% endblock %}

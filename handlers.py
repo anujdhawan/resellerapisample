@@ -17,8 +17,8 @@ from google.appengine.api import urlfetch
 from google.appengine.api import memcache
 
 
-CLIENT_ID = "<CLIENT_ID_HERE>"
-CLIENT_SECRET = "<CLIENT_SECRET_HERE>"
+CLIENT_ID = "<CLIENT-ID>"
+CLIENT_SECRET = "<CLIENT-SECRET>"
 SCOPES = ["https://www.googleapis.com/auth/apps.order",
           "https://www.googleapis.com/auth/apps.order.readonly"]
 
@@ -169,6 +169,69 @@ class OpNewCustomer(BaseHandler):
             "response_headers": resp.headers}
 
     self._Render("op/new-customer-result.html", data)
+
+
+class OpGetCustomer(BaseHandler):
+  def get(self):
+    self._Render("op/get-customer.html", {})
+
+  def post(self):
+    token = self._GetToken()
+    if not token:
+      self.redirect("/")
+      return
+
+    url = self._GetApiUri()+"/customers/"+self.request.POST.get("customerId")
+    resp = urlfetch.fetch(url=url,
+                          method="GET",
+                          headers={"Authorization": "Bearer "+self._GetToken()},
+                          deadline=30)
+    data = {"response": resp.content,
+            "response_code": resp.status_code,
+            "response_headers": resp.headers}
+    self._Render("op/get-customer-result.html", data)
+
+
+class OpChangeSeats(BaseHandler):
+  def get(self):
+    data = {}
+    token = self._GetToken()
+    if token:
+      resp = urlfetch.fetch(url=self._GetApiUri()+"/subscriptions",
+                            headers={"Authorization": "Bearer "+self._GetToken()},
+                            deadline=15)
+      data["subscriptions"] = json.loads(resp.content)
+
+    self._Render("op/change-seats.html", data)
+
+  def post(self):
+    data = {}
+    token = self._GetToken()
+    if not token:
+      self.redirect("/")
+      return
+
+    subscription = self.request.POST.get("subscription")
+    customerId, subscriptionId = subscription.split(":")
+
+    request_data = {"kind": "subscriptions#seats",
+                    "numberOfSeats": self.request.POST.get("numberOfSeats")}
+    if self.request.POST.get("maximumNumberOfSeats") != "":
+      request_data["maximumNumberOfSeats"] = self.request.POST.get("maximumNumberOfSeats")
+
+    url = self._GetApiUri()+"/customers/"+customerId+"/subscriptions/"+subscriptionId+"/changeSeats"
+    resp = urlfetch.fetch(url=url,
+                          method="POST",
+                          payload=json.dumps(request_data),
+                          headers={"Authorization": "Bearer "+self._GetToken(),
+                                   "Content-Type": "application/json"},
+                          deadline=30)
+
+    data = {"request": json.dumps(request_data),
+            "response": resp.content,
+            "response_code": resp.status_code,
+            "response_headers": resp.headers}
+    self._Render("op/change-seats-result.html", data)
 
 
 class OAuthCallback(BaseHandler):

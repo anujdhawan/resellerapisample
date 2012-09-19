@@ -1,0 +1,20 @@
+{% extends "skeleton.html" %}
+
+{% block head %}
+  <style>
+    a.button.red {
+      padding: 4px 20pt;
+      margin-top: 1em;
+      float: left;
+      text-align: center;
+    }
+  </style>
+{% endblock %}
+
+{% block main_content %}
+  <h1>Change Seats</h1>
+  <h2>Response</h2>
+  <p>Status: {{response_code}}</p>
+  <pre>{{response}}</pre>
+  <a href="/op/get-customer" class="button red">OK</a>
+{% endblock %}
