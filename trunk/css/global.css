@@ -90,6 +90,15 @@ fieldset legend {
   padding: 0 0.5em;
 }
 
+ul {
+  list-style: disc;
+  margin: 1em 0 1em 1.5em;
+}
+
+p {
+  margin: 1em 0;
+}
+
 /******************
  * Button Styling
  */

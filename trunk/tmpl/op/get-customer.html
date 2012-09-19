@@ -1,0 +1,36 @@
+{% extends "skeleton.html" %}
+
+{% block head %}
+  <style>
+    fieldset {
+      width: 400pt;
+    }
+    fieldset label {
+      float: left;
+      width: 100pt;
+      margin: 0.25em 0;
+    }
+    fieldset input {
+      float: left;
+      width: 250pt;
+      margin: 0.25em 0;
+    }
+
+    fieldset input[type=submit] {
+      clear: both;
+      width: 75pt;
+    }
+  </style>
+{% endblock %}
+
+{% block main_content %}
+  <h1>Get Customer</h1>
+  <fieldset>
+    <form method="post">
+      <label for="customerId">Customer ID:</label>
+      <input type="text" name="customerId" id="customerId" placeholder="domain.com" />
+
+      <input type="submit" />
+    </form>
+  </fieldset>
+{% endblock %}
