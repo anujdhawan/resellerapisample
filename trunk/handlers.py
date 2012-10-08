@@ -9,6 +9,8 @@ import os
 from itertools import izip, cycle
 import jinja2
 import json
+import random
+import time
 from urllib import urlencode
 import urlparse
 import webapp2 as webapp
@@ -30,6 +32,35 @@ XOR_KEY = "<RANDOM_STRING>"
 
 jinja_env = jinja2.Environment(loader=jinja2.FileSystemLoader(
     os.path.join(os.path.dirname(__file__), 'tmpl')))
+
+
+def fetch_with_backoff(max_tries=5, **kwargs):
+  """Calls urlfetch.fetch() with the given kwargs parameters.
+
+  This function uses an exponential backoff algorithm, as described here:
+  http://googleappsdeveloper.blogspot.com.au/2011/12/documents-list-api-best-practices.html
+  We will try max_tries times, but only in case of a response that allows for
+  retry (e.g. 503).
+
+  Args:
+    max_tries: The maximum number of times to retry the request, the default
+               is five (which corresponds to approximately 1 minute.
+    **kwargs: The arguments to pass to urlfetch.fetch()
+
+  Returns:
+    The response object. We will check the response object for retryable errors
+    and only return the last response object in that case."""
+  for n in range(0, max_tries):
+    response = urlfetch.fetch(**kwargs)
+    if response.status_code not in [503, 500]:
+      # not a retryable error, return response
+      return response
+    # otherwise, we got an error, need to wait a bit and then retry
+    sleep_time = (2 ** n) + random.random()
+    time.sleep(sleep_time)
+  # if we break out of the loop, it means we waited more than max_tries, so
+  # we'll just return the last response anyway
+  return response
 
 
 def xor_string(data, key):
@@ -114,9 +145,10 @@ class OpListSubscriptions(BaseHandler):
     data = {}
     token = self._GetToken()
     if token:
-      resp = urlfetch.fetch(url=self._GetApiUri()+"/subscriptions",
-                            headers={"Authorization": "Bearer "+self._GetToken()},
-                            deadline=15)
+      headers = {"Authorization": "Bearer "+self._GetToken()}
+      resp = fetch_with_backoff(url=self._GetApiUri()+"/subscriptions",
+                                headers=headers,
+                                deadline=15)
       data["data"] = resp.content
 
     self._Render("op/list-subscriptions.html", data)
@@ -157,12 +189,12 @@ class OpNewCustomer(BaseHandler):
                     "phoneNumber": self.request.POST.get("phoneNumber"),
                     "alternateEmail": self.request.POST.get("alternateEmail")}
 
-    resp = urlfetch.fetch(url=self._GetApiUri()+"/customers",
-                          method="POST",
-                          payload=json.dumps(request_data),
-                          headers={"Authorization": "Bearer "+self._GetToken(),
-                                   "Content-Type": "application/json"},
-                          deadline=30)
+    resp = fetch_with_backoff(url=self._GetApiUri()+"/customers",
+                              method="POST",
+                              payload=json.dumps(request_data),
+                              headers={"Authorization": "Bearer "+self._GetToken(),
+                                       "Content-Type": "application/json"},
+                              deadline=30)
     data = {"request": json.dumps(request_data),
             "response": resp.content,
             "response_code": resp.status_code,
@@ -182,10 +214,10 @@ class OpGetCustomer(BaseHandler):
       return
 
     url = self._GetApiUri()+"/customers/"+self.request.POST.get("customerId")
-    resp = urlfetch.fetch(url=url,
-                          method="GET",
-                          headers={"Authorization": "Bearer "+self._GetToken()},
-                          deadline=30)
+    resp = fetch_with_backoff(url=url,
+                              method="GET",
+                              headers={"Authorization": "Bearer "+self._GetToken()},
+                              deadline=30)
     data = {"response": resp.content,
             "response_code": resp.status_code,
             "response_headers": resp.headers}
@@ -197,9 +229,9 @@ class OpChangeSeats(BaseHandler):
     data = {}
     token = self._GetToken()
     if token:
-      resp = urlfetch.fetch(url=self._GetApiUri()+"/subscriptions",
-                            headers={"Authorization": "Bearer "+self._GetToken()},
-                            deadline=15)
+      resp = fetch_with_backoff(url=self._GetApiUri()+"/subscriptions",
+                                headers={"Authorization": "Bearer "+self._GetToken()},
+                                deadline=15)
       data["subscriptions"] = json.loads(resp.content)
 
     self._Render("op/change-seats.html", data)
@@ -220,12 +252,12 @@ class OpChangeSeats(BaseHandler):
       request_data["maximumNumberOfSeats"] = self.request.POST.get("maximumNumberOfSeats")
 
     url = self._GetApiUri()+"/customers/"+customerId+"/subscriptions/"+subscriptionId+"/changeSeats"
-    resp = urlfetch.fetch(url=url,
-                          method="POST",
-                          payload=json.dumps(request_data),
-                          headers={"Authorization": "Bearer "+self._GetToken(),
-                                   "Content-Type": "application/json"},
-                          deadline=30)
+    resp = fetch_with_backoff(url=url,
+                              method="POST",
+                              payload=json.dumps(request_data),
+                              headers={"Authorization": "Bearer "+self._GetToken(),
+                                       "Content-Type": "application/json"},
+                              deadline=30)
 
     data = {"request": json.dumps(request_data),
             "response": resp.content,
@@ -252,10 +284,10 @@ class OAuthCallback(BaseHandler):
                 redirect_uri=urlparse.urljoin(self.request.url,
                                               "/oauth2callback"),
                 grant_type="authorization_code")
-    response = urlfetch.fetch(url=OAUTH_BASE_URI + "/token",
-                              payload=urlencode(data),
-                              method="POST",
-                              deadline=15)
+    response = fetch_with_backoff(url=OAUTH_BASE_URI + "/token",
+                                  payload=urlencode(data),
+                                  method="POST",
+                                  deadline=15)
     data = json.loads(response.content)
     if "error" in data:
       # TODO: handle errors
