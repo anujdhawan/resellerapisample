@@ -1,0 +1,1 @@
+This is a short sample showing basic use of the Google Apps Reseller API. It is not intended to be fully-functional but it shows the basic usage of OAuth2 for authentication and calling a couple of the methods.
